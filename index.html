@@ -1,41 +1,243 @@
 <!DOCTYPE html>
-<html lang="en">
-
-  <head>
+<html lang="es">
+<head>
     <meta charset="UTF-8">
-    <title>Untitled</title>
-    <link rel="stylesheet" href="./style.css">
-
-  </head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PanIA Pro</title>
     
-  <body>
-  <div class="card">
-  <h2>🥖 PanIA Pro - Maestro Panadero</h2>
-  
-  <div class="ai-chat-window">
-    <div id="chat-display" class="chat-display">
-      Hola, soy tu asistente panadero. Pregúntame algo como: "¿Cómo hago 2 kilos de pan?" o "¿Qué lleva la focaccia?"
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3014/3014535.png">
+
+    <style>
+        :root {
+            --pan-gold: #d4a373;
+            --pan-cream: #faedcd;
+            --pan-dark: #5d4037;
+            --bg-app: #fefae0;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--pan-dark);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--white);
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(93, 64, 55, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cabecera */
+        .header {
+            background: var(--pan-gold);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+        }
+
+        .header h1 { margin: 0; font-size: 24px; letter-spacing: 1px; }
+        .header p { margin: 5px 0 0; opacity: 0.9; font-size: 14px; }
+
+        /* Sección de Chat */
+        .chat-section {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .ai-bubble {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 20px;
+            border-bottom-left-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 15px;
+            line-height: 1.5;
+            border: 1px solid #bbdefb;
+            color: #0d47a1;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], input[type="number"], select {
+            border: 2px solid #e9edc9;
+            border-radius: 15px;
+            padding: 12px 15px;
+            font-size: 16px; /* Evita zoom automático en iPhone */
+            outline: none;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--pan-gold); }
+
+        .btn-send {
+            background: var(--pan-gold);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 0 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Resultados Card */
+        .result-card {
+            background: var(--pan-cream);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 10px;
+        }
+
+        .ingredient-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .ingredient-row:last-child { border: none; }
+        .total-badge {
+            display: inline-block;
+            background: var(--pan-dark);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .quick-calc { margin-top: 20px; border-top: 2px dashed #e9edc9; pt: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>🥖 PanIA Pro</h1>
+        <p>Tu asistente inteligente de panadería</p>
     </div>
-    <div class="chat-input-area">
-      <input type="text" id="userQuery" placeholder="Escribe tu duda aquí...">
-      <button onclick="preguntarIA()">Preguntar</button>
+
+    <div class="chat-section">
+        <div id="ai-response" class="ai-bubble">
+            ¡Hola! 👋 Soy tu IA panadera. Escribe algo como: <b>"1 kilo de pan rústico"</b> o pregúntame cómo hacer focaccia.
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="userQuery" placeholder="Pregunta lo que quieras...">
+            <button class="btn-send" onclick="askAI()">Enviar</button>
+        </div>
+
+        <div class="quick-calc">
+            <h4 style="margin: 15px 0 10px;">Calculadora de Proporciones</h4>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="number" id="harina" value="500" oninput="quickCalc()">
+                <span style="align-self: center;">gr</span>
+            </div>
+            <select id="tipoPan" onchange="quickCalc()">
+                <option value="comun">Pan de Mesa (60% agua)</option>
+                <option value="baguette">Baguette Francesa (65% agua)</option>
+                <option value="rustico">Pan de Campo (75% agua)</option>
+                <option value="ciabatta">Ciabatta (80% agua)</option>
+                <option value="pizza">Masa de Pizza (65% agua)</option>
+                <option value="dulce">Pan Dulce / Brioche</option>
+            </select>
+
+            <div id="resultArea" class="result-card">
+                </div>
+        </div>
     </div>
-  </div>
-
-  <hr>
-
-  <p>O usa la calculadora rápida:</p>
-  <input type="number" id="harina" placeholder="Harina en gramos" value="500" oninput="calcular()">
-  <select id="tipo" onchange="calcular()">
-    <option value="comun">Pan Común</option>
-    <option value="rustico">Pan Rústico (75% Hidra)</option>
-    <option value="brioche">Pan Dulce / Brioche</option>
-  </select>
-
-  <div class="result" id="resultado"></div>
 </div>
-    <script  src="./script.js"></script>
 
-  </body>
-  
+<script>
+    const recetas = {
+        comun: { hidra: 0.60, sal: 0.02, lev: 0.01, nombre: "Pan de Mesa" },
+        baguette: { hidra: 0.65, sal: 0.02, lev: 0.012, nombre: "Baguette" },
+        rustico: { hidra: 0.75, sal: 0.02, lev: 0.008, nombre: "Pan Rústico" },
+        ciabatta: { hidra: 0.80, sal: 0.02, lev: 0.015, nombre: "Ciabatta" },
+        pizza: { hidra: 0.65, sal: 0.025, lev: 0.005, nombre: "Masa Pizza" },
+        dulce: { hidra: 0.35, sal: 0.01, lev: 0.02, extra: {"Leche": 0.2, "Azúcar": 0.1}, nombre: "Pan Dulce" }
+    };
+
+    function askAI() {
+        const query = document.getElementById('userQuery').value.toLowerCase();
+        const aiBox = document.getElementById('ai-response');
+        let r = "No entiendo la consulta, pero intenta poner la cantidad, ejemplo: '2kg de pizza'.";
+
+        // Detectar cantidad
+        let gramos = 0;
+        if (query.includes("kilo") || query.includes("kg")) {
+            let num = query.match(/(\d+(\.\d+)?)/);
+            gramos = num ? parseFloat(num[0]) * 1000 : 1000;
+        } else if (query.includes("gramo") || query.includes("gr")) {
+            let num = query.match(/(\d+)/);
+            gramos = num ? parseFloat(num[0]) : 500;
+        }
+
+        if (gramos > 0) {
+            let tipo = "comun";
+            for (let key in recetas) {
+                if (query.includes(key)) tipo = key;
+            }
+            let f = recetas[tipo];
+            r = `Para <b>${gramos}g</b> de <b>${f.nombre}</b> necesitas:<br>
+                💧 ${Math.round(gramos * f.hidra)}ml de Agua<br>
+                🧂 ${(gramos * f.sal).toFixed(1)}g de Sal<br>
+                🍞 ${(gramos * f.lev).toFixed(1)}g de Levadura seca.<br>
+                💡 <i>Consejo: Deja reposar la masa 20 min antes de amasar.</i>`;
+        } else if (query.includes("hola")) {
+            r = "¡Hola panadero! Dime qué cantidad de harina tienes y te diré el resto.";
+        }
+
+        aiBox.innerHTML = r;
+        document.getElementById('userQuery').value = "";
+    }
+
+    function quickCalc() {
+        const h = parseFloat(document.getElementById('harina').value) || 0;
+        const t = document.getElementById('tipoPan').value;
+        const f = recetas[t];
+        const res = document.getElementById('resultArea');
+
+        let html = `
+            <div class="ingredient-row"><span>💧 Agua</span> <b>${Math.round(h * f.hidra)}ml</b></div>
+            <div class="ingredient-row"><span>🧂 Sal</span> <b>${(h * f.sal).toFixed(1)}g</b></div>
+            <div class="ingredient-row"><span>🍞 Levadura</span> <b>${(h * f.lev).toFixed(1)}g</b></div>
+        `;
+
+        if (f.extra) {
+            for (let e in f.extra) {
+                html += `<div class="ingredient-row"><span>✨ ${e}</span> <b>${(h * f.extra[e]).toFixed(1)}g</b></div>`;
+            }
+        }
+
+        let total = h + (h * f.hidra) + (h * f.sal) + (h * f.lev);
+        html += `<div class="total-badge">Masa total: ${Math.round(total)}g</div>`;
+        
+        res.innerHTML = html;
+    }
+
+    // Iniciar
+    quickCalc();
+</script>
+
+</body>
 </html>
