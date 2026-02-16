@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Untitled</title>
+    <link rel="stylesheet" href="./style.css">
+
+  </head>
+    
+  <body>
+  <div class="card">
+  <h2>🥖 PanIA Pro - Maestro Panadero</h2>
+  
+  <div class="ai-chat-window">
+    <div id="chat-display" class="chat-display">
+      Hola, soy tu asistente panadero. Pregúntame algo como: "¿Cómo hago 2 kilos de pan?" o "¿Qué lleva la focaccia?"
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="userQuery" placeholder="Escribe tu duda aquí...">
+      <button onclick="preguntarIA()">Preguntar</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <p>O usa la calculadora rápida:</p>
+  <input type="number" id="harina" placeholder="Harina en gramos" value="500" oninput="calcular()">
+  <select id="tipo" onchange="calcular()">
+    <option value="comun">Pan Común</option>
+    <option value="rustico">Pan Rústico (75% Hidra)</option>
+    <option value="brioche">Pan Dulce / Brioche</option>
+  </select>
+
+  <div class="result" id="resultado"></div>
+</div>
+    <script  src="./script.js"></script>
+
+  </body>
+  
+</html>
